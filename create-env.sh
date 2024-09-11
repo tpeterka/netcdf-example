@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export SPACKENV=scorpio-example-env
+export SPACKENV=netcdf-example-env
 export YAML=$PWD/env.yaml
 
 # create spack environment
@@ -13,17 +13,10 @@ spack env create $SPACKENV $YAML
 echo "activating spack environment"
 spack env activate $SPACKENV
 
-spack develop lowfive@master build_type=Debug
 spack add lowfive
-
-spack develop netcdf-c@main+mpi build_system=cmake build_type=Debug
-spack add netcdf-c@main+mpi
-
-spack develop mpas-o-scorpio@master+hdf5 build_type=Debug
-spack add mpas-o-scorpio+hdf5
-
-spack develop scorpio-example@master
-spack add scorpio-example
+spack add wilkins
+spack add henson+python+mpi-wrappers
+spack add netcdf-c@4.9+mpi build_system=cmake
 
 # install everything in environment
 echo "installing dependencies in environment"

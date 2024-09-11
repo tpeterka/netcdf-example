@@ -1,9 +1,12 @@
 #include <diy/mpi/communicator.hpp>
 #include "prod-con.hpp"
 
-#include <pio.h>
+#include <netcdf.h>
+#include <netcdf_par.h>
 
 #define MAX_DIMS 10
+
+#define ERR {if(err!=NC_NOERR)printf("Error at line=%d: %s\n", __LINE__, nc_strerror(err));}
 
 herr_t fail_on_hdf5_error(hid_t stack_id, void*)
 {
@@ -38,16 +41,13 @@ void producer_f (
     int                     ioproc_start    = 0;
     int                     iosysid;
     int                     ncid;
-    int                     format          = PIO_IOTYPE_NETCDF4P;
-    PIO_Offset              elements_per_pe;
-    int                     ioid;
+    int                     elements_per_pe;
     int                     ndims;
     int                     varid1          = -1;
     int                     varid2          = -1;
-    std::vector<PIO_Offset> compdof;
     std::vector<int>        dim_len(MAX_DIMS);
     std::vector<int>        dimid_v1(MAX_DIMS);
-    std::vector<int>        dimid_v2(MAX_DIMS);
+    int                     err;
 
     // debug
     fmt::print(stderr, "producer: local comm rank {} size {}\n", local_.rank(), local_.size());
@@ -76,17 +76,11 @@ void producer_f (
             vol_plugin.set_memory("example1.nc", "*");
     }
 
-    // set Scorpio log level
-    PIOc_set_log_level(5);
-
     // set HDF5 error handler
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
-    // init PIO
-    PIOc_Init_Intracomm(local, local_.size(), ioproc_stride, ioproc_start, PIO_REARR_SUBSET, &iosysid);
-
     // create file
-    PIOc_createfile(iosysid, &ncid, &format, "example1.nc", PIO_CLOBBER);
+    err = nc_create_par("example1.nc", NC_NETCDF4 | NC_CLOBBER, local, MPI_INFO_NULL,  &ncid); ERR
 
     // variable sizes
     int ntime_steps = 3;
@@ -96,20 +90,15 @@ void producer_f (
     // define variables
 
     // ----- variable v1 -----
-
-    PIOc_def_dim(ncid, "s", (PIO_Offset)dim_len[0], &dimid_v1[0]);
-    PIOc_def_var(ncid, "v1", PIO_INT, 1, &dimid_v1[0], &varid1);
+    err = nc_def_dim(ncid, "s", dim_len[0], &dimid_v1[0]); ERR
+    err = nc_def_var(ncid, "v1", NC_INT, 1, &dimid_v1[0], &varid1); ERR
     fmt::print(stderr, "producer varid1 = {} dimid_v1 = [{}]\n", varid1, dimid_v1[0]);
 
-    // ----- variable v2 -----
+    // collective access for all variables
+    err = nc_var_par_access(ncid, NC_GLOBAL, NC_COLLECTIVE); ERR
 
-//     PIOc_def_dim(ncid, "t", (PIO_Offset)ntime_steps, &dimid_v2[0]);
-    PIOc_def_dim(ncid, "t", NC_UNLIMITED, &dimid_v2[0]);
-    PIOc_def_dim(ncid, "x", (PIO_Offset)dim_len[0], &dimid_v2[1]);
-    PIOc_def_dim(ncid, "y", (PIO_Offset)dim_len[1], &dimid_v2[2]);
-    PIOc_def_var(ncid, "v2", PIO_DOUBLE, 3, &dimid_v2[0], &varid2);
-    fmt::print(stderr, "producer varid2 = {} dimid_v2 = [{}, {}]\n", varid2, dimid_v2[0], dimid_v2[1]);
-    PIOc_enddef(ncid);
+    // end define mode
+    err = nc_enddef(ncid); ERR
 
     // write variables
 
@@ -117,42 +106,18 @@ void producer_f (
 
     // decomposition
     elements_per_pe = dim_len[0] / local_.size();
-    compdof.resize(elements_per_pe);
-    for (int i = 0; i < elements_per_pe; i++)
-        compdof[i] = local_.rank() * elements_per_pe + i + 1;       // scorpio's compdof starts at 1, not 0
-    PIOc_InitDecomp(iosysid, PIO_INT, 1, &dim_len[0], (PIO_Offset)elements_per_pe, &compdof[0], &ioid, NULL, NULL, NULL);
-
-    // write the data
     std::vector<int> v1(elements_per_pe);
+    std::vector<size_t> starts(1), counts(1);
+    starts[0] = local_.rank() * elements_per_pe;
+    counts[0] = elements_per_pe;
     for (int i = 0; i < elements_per_pe; i++)
         v1[i] = local_.rank() * elements_per_pe + i;
-    PIOc_write_darray(ncid, varid1, ioid, (PIO_Offset)elements_per_pe, &v1[0], NULL);
 
-    // -------- variable v2 --------
+    // write variable
+    err = nc_put_vara_int(ncid, varid1, &starts[0], &counts[0], &v1[0]); ERR
 
-    // decomposition
-    elements_per_pe = dim_len[0] * dim_len[1] / local_.size();
-    compdof.resize(elements_per_pe);
-    for (int i = 0; i < elements_per_pe; i++)
-        compdof[i] = local_.rank() * elements_per_pe + i + 1;       // scorpio's compdof starts at 1, not 0
-    PIOc_InitDecomp(iosysid, PIO_DOUBLE, 2, &dim_len[0], (PIO_Offset)elements_per_pe, &compdof[0], &ioid, NULL, NULL, NULL);
-
-    // write the data
-    std::vector<double> v2(elements_per_pe);
-    for (auto t = 0; t < ntime_steps; t++)      // for all timesteps
-    {
-        for (int i = 0; i < elements_per_pe; i++)
-            v2[i] = t * elements_per_pe * local_.size() + local_.rank() * elements_per_pe + i;;
-        PIOc_setframe(ncid, varid2, t);
-        PIOc_write_darray(ncid, varid2, ioid, (PIO_Offset)elements_per_pe, &v2[0], NULL);
-    }
-
-    PIOc_sync(ncid);                        // flush everything
-
-    // clean up
-    PIOc_closefile(ncid);
-    PIOc_freedecomp(iosysid, ioid);
-    PIOc_finalize(iosysid);
+    // close file
+    err = nc_close(ncid); ERR
 
     // debug
     fmt::print(stderr, "*** producer after closing file ***\n");

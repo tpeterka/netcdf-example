@@ -3,11 +3,13 @@
 #include "prod-con.hpp"
 
 #include <netcdf.h>
-#include <pio.h>
+#include <netcdf_par.h>
 
 #include "fmt/format.h"
 
 #define MAX_DIMS 10
+
+#define ERR {if(err!=NC_NOERR)printf("Error at line=%d: %s\n", __LINE__, nc_strerror(err));}
 
 herr_t fail_on_hdf5_error(hid_t stack_id, void*)
 {
@@ -43,20 +45,16 @@ void consumer_f (
     int                     ioproc_start    = 0;
     int                     iosysid;
     int                     ncid;
-    int                     format          = PIO_IOTYPE_NETCDF4P;
-    PIO_Offset              elements_per_pe;
-    int                     ioid;
+    int                     elements_per_pe;
     int                     ndims;
     int                     varid1          = -1;
     int                     varid2          = -1;
-    std::vector<PIO_Offset> compdof;
     std::vector<int>        dim_len(MAX_DIMS);
     std::vector<int>        dimid_v1(MAX_DIMS);
-    std::vector<int>        dimid_v2(MAX_DIMS);
     int                     nvars;                  // number of variables
     int                     ngatts;                 // number of global attributes
-    int                     unlimdimid;             // id of unlimited dimension
-
+    int                     unlimdimid;             // id of unlimited dim
+    int                     err;;
 
     // debug
     fmt::print(stderr, "consumer: local comm rank {} size {}\n", local_.rank(), local_.size());
@@ -88,31 +86,28 @@ void consumer_f (
         vol_plugin.set_memory("example1.nc", "*");
     vol_plugin.set_intercomm("example1.nc", "*", 0);
 
-    // set Scorpio log level
-    PIOc_set_log_level(5);
-
     // set HDF5 error handler
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
-    // init PIO
-    PIOc_Init_Intracomm(local, local_.size(), ioproc_stride, ioproc_start, PIO_REARR_SUBSET, &iosysid);
-
     // open file for reading
-    PIOc_openfile(iosysid, &ncid, &format, "example1.nc", PIO_NOWRITE);
+    err = nc_open_par("example1.nc", NC_NOWRITE, local, MPI_INFO_NULL, &ncid); ERR
+
+    // collective access for all variables
+    err = nc_var_par_access(ncid, NC_GLOBAL, NC_COLLECTIVE); ERR
 
     // read the metadata
 
     // global metadata
-    PIOc_inq(ncid, &ndims, &nvars, &ngatts, &unlimdimid);
+    err = nc_inq(ncid, &ndims, &nvars, &ngatts, &unlimdimid); ERR
     fmt::print(stderr, "*** consumer metadata: ndims {} nvars {} ngatts {} unlimdimid {} ***\n",
             ndims, nvars, ngatts, unlimdimid);
 
     // dimensions
     char dimname[256];
-    PIO_Offset dimlen;
+    size_t dimlen;
     for (int d = 0; d < ndims; d++)
     {
-        PIOc_inq_dim(ncid, d, dimname, &dimlen);
+        err = nc_inq_dim(ncid, d, dimname, &dimlen); ERR
         fmt::print(stderr, "*** consumer dim {} dim_name {} dimlen {} ***\n", d, dimname, dimlen);
     }
 
@@ -121,7 +116,7 @@ void consumer_f (
     std::vector<int>        dimids(MAX_DIMS);       // dimension ids
     int                     natts;                  // number of variable attributes
     nc_type                 dtype;                  // netCDF data type of this variable
-    PIOc_inq_var(ncid, 0, varname, 256, &dtype, &ndims, &dimids[0], &natts);
+    err = nc_inq_var(ncid, 0, varname, &dtype, &ndims, &dimids[0], &natts); ERR
     fmt::print(stderr, "*** consumer varname {} dtype {} NC_DOUBLE {} ndims {} dimids [{}] natts {}\n",
             varname, dtype, NC_DOUBLE, ndims, fmt::join(dimids, ","), natts);
 
@@ -136,20 +131,20 @@ void consumer_f (
 
     // decomposition
     elements_per_pe = dim_len[0] / local_.size();
-    compdof.resize(elements_per_pe);
-    for (int i = 0; i < elements_per_pe; i++)
-        compdof[i] = local_.rank() * elements_per_pe + i + 1;        // scorpio's compdof starts at 1, not 0
-    PIOc_InitDecomp(iosysid, PIO_INT, 1, &dim_len[0], (PIO_Offset)elements_per_pe, &compdof[0], &ioid, NULL, NULL, NULL);
+    std::vector<int> v1(elements_per_pe);
+    std::vector<size_t> starts(1), counts(1);
+    starts[0] = local_.rank() * elements_per_pe;
+    counts[0] = elements_per_pe;
 
     // read the metadata (get variable ID)
-    PIOc_inq_varid(ncid, "v1", &varid1);
+    nc_inq_varid(ncid, "v1", &varid1);
 
     // debug
     fmt::print(stderr, "*** consumer after inquiring variable ID {} for v1 ***\n", varid1);
 
-    // read the data
-    std::vector<int> v1(elements_per_pe);
-    PIOc_read_darray(ncid, varid1, ioid, (PIO_Offset)elements_per_pe, &v1[0]);
+    // read variable
+    err = nc_get_vara_int(ncid, varid1, &starts[0], &counts[0], &v1[0]); ERR
+
     // check the data values
     for (int i = 0; i < elements_per_pe; i++)
     {
@@ -160,47 +155,13 @@ void consumer_f (
         }
     }
 
-    // -------- variable v2 --------
-
-    // decomposition
-    elements_per_pe = dim_len[0] * dim_len[1] / local_.size();
-    compdof.resize(elements_per_pe);
-    for (int i = 0; i < elements_per_pe; i++)
-        compdof[i] = local_.rank() * elements_per_pe + i + 1;        // scorpio's compdof starts at 1, not 0
-    PIOc_InitDecomp(iosysid, PIO_DOUBLE, 2, &dim_len[0], (PIO_Offset)elements_per_pe, &compdof[0], &ioid, NULL, NULL, NULL);
-
-    // read the metadata (get variable ID)
-    PIOc_inq_varid(ncid, "v2", &varid2);
-
-    // debug
-    fmt::print(stderr, "*** consumer after inquiring variable ID {} for v2  ***\n", varid2);
-
-    // read the data
-    std::vector<double> v2(elements_per_pe);
-    for (auto t = 0; t < ntime_steps; t++)      // for all timesteps
-    {
-        PIOc_setframe(ncid, varid2, t);
-        PIOc_read_darray(ncid, varid2, ioid, (PIO_Offset)elements_per_pe, &v2[0]);
-
-        // check the data values
-        for (int i = 0; i < elements_per_pe; i++)
-        {
-            if (v2[i] != t * elements_per_pe * local_.size() + local_.rank() * elements_per_pe + i)
-            {
-                fmt::print(stderr, "*** consumer error: v2[{}] = {} which should be {} ***\n", i, v2[i], t * elements_per_pe * local_.size() + local_.rank() * elements_per_pe + i);
-                abort();
-            }
-        }
-    }
-
-    // clean up
-    PIOc_closefile(ncid);
-    PIOc_freedecomp(iosysid, ioid);
-    PIOc_finalize(iosysid);
-    if (!shared)
-        H5Pclose(plist);
+    // clsoe file
+    err = nc_close(ncid); ERR
 
     // debug
     fmt::print(stderr, "*** consumer after closing file ***\n");
+
+    if (!shared)
+        H5Pclose(plist);
 }
 
