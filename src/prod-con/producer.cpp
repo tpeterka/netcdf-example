@@ -45,7 +45,7 @@ void producer_f (
     int                     ndims;
     int                     varid1          = -1;
     int                     varid2          = -1;
-    std::vector<int>        dim_len(MAX_DIMS);
+    std::vector<size_t>     dim_len(MAX_DIMS);
     std::vector<int>        dimid_v1(MAX_DIMS);
     int                     err;
 
@@ -92,10 +92,7 @@ void producer_f (
     // ----- variable v1 -----
     err = nc_def_dim(ncid, "s", dim_len[0], &dimid_v1[0]); ERR
     err = nc_def_var(ncid, "v1", NC_INT, 1, &dimid_v1[0], &varid1); ERR
-    fmt::print(stderr, "producer varid1 = {} dimid_v1 = [{}]\n", varid1, dimid_v1[0]);
-
-    // collective access for all variables
-    err = nc_var_par_access(ncid, NC_GLOBAL, NC_COLLECTIVE); ERR
+//     fmt::print(stderr, "producer varid1 = {} dimid_v1 = [{}]\n", varid1, dimid_v1[0]);
 
     // end define mode
     err = nc_enddef(ncid); ERR
@@ -113,8 +110,13 @@ void producer_f (
     for (int i = 0; i < elements_per_pe; i++)
         v1[i] = local_.rank() * elements_per_pe + i;
 
+    // set collective access
+    err = nc_var_par_access(ncid, varid1, NC_COLLECTIVE); ERR
+
     // write variable
     err = nc_put_vara_int(ncid, varid1, &starts[0], &counts[0], &v1[0]); ERR
+
+    // ---------------------------
 
     // close file
     err = nc_close(ncid); ERR

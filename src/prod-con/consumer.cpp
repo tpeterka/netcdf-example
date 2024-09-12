@@ -92,9 +92,6 @@ void consumer_f (
     // open file for reading
     err = nc_open_par("example1.nc", NC_NOWRITE, local, MPI_INFO_NULL, &ncid); ERR
 
-    // collective access for all variables
-    err = nc_var_par_access(ncid, NC_GLOBAL, NC_COLLECTIVE); ERR
-
     // read the metadata
 
     // global metadata
@@ -108,6 +105,7 @@ void consumer_f (
     for (int d = 0; d < ndims; d++)
     {
         err = nc_inq_dim(ncid, d, dimname, &dimlen); ERR
+        dim_len[d] = dimlen;
         fmt::print(stderr, "*** consumer dim {} dim_name {} dimlen {} ***\n", d, dimname, dimlen);
     }
 
@@ -117,13 +115,8 @@ void consumer_f (
     int                     natts;                  // number of variable attributes
     nc_type                 dtype;                  // netCDF data type of this variable
     err = nc_inq_var(ncid, 0, varname, &dtype, &ndims, &dimids[0], &natts); ERR
-    fmt::print(stderr, "*** consumer varname {} dtype {} NC_DOUBLE {} ndims {} dimids [{}] natts {}\n",
-            varname, dtype, NC_DOUBLE, ndims, fmt::join(dimids, ","), natts);
-
-    // variable sizes
-    int ntime_steps = 3;
-    dim_len[0]  = 128;
-    dim_len[1]  = 256;
+    fmt::print(stderr, "*** consumer varname {} dtype {} ndims {} dimids [{}] natts {}\n",
+            varname, dtype, ndims, fmt::join(dimids, ","), natts);
 
     // read variables
 
@@ -139,8 +132,8 @@ void consumer_f (
     // read the metadata (get variable ID)
     nc_inq_varid(ncid, "v1", &varid1);
 
-    // debug
-    fmt::print(stderr, "*** consumer after inquiring variable ID {} for v1 ***\n", varid1);
+    // set collective access
+    err = nc_var_par_access(ncid, varid1, NC_COLLECTIVE); ERR
 
     // read variable
     err = nc_get_vara_int(ncid, varid1, &starts[0], &counts[0], &v1[0]); ERR
@@ -155,7 +148,9 @@ void consumer_f (
         }
     }
 
-    // clsoe file
+    // ------------------------------
+
+    // close file
     err = nc_close(ncid); ERR
 
     // debug

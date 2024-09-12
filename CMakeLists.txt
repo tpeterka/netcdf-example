@@ -28,6 +28,39 @@ endif                       ()
 # Threads
 find_package                (Threads)
 
+# DIY
+if                          (NOT DEFINED DIY_PATH AND DEFINED ENV{DIY_PATH})
+    set                     (DIY_PATH $ENV{DIY_PATH})
+endif                       ()
+
+if                          (DIY_PATH)
+    message                 ("Found DIY_PATH")
+    set                     (DIY_INCLUDE_DIR ${DIY_PATH}/include)
+else                        ()
+    message                 ("Looking for DIY")
+    find_package            (diy REQUIRED)
+endif                       ()
+message                     ("DIY_INCLUDE_DIR = ${DIY_INCLUDE_DIR}")
+include_directories         (SYSTEM ${DIY_INCLUDE_DIR})
+
+# fmt
+if                          (NOT DEFINED FMT_PATH AND DEFINED ENV{FMT_PATH})
+    set                     (FMT_PATH $ENV{FMT_PATH})
+endif                       ()
+
+if                          (FMT_PATH)
+    message                 ("Found FMT_PATH")
+    set                     (FMT_INCLUDE_DIR ${FMT_PATH}/include)
+    set                     (FMT_LIBRARY ${FMT_PATH}/lib/libfmt.a)
+else                        ()
+    message                 ("Looking for fmt")
+    find_package            (fmt REQUIRED)
+endif                       ()
+message                     ("FMT_INCLUDE_DIR = ${FMT_INCLUDE_DIR}")
+message                     ("FMT_LIBRARY = ${FMT_LIBRARY}")
+set                         (libraries ${libraries} ${FMT_LIBRARY})
+include_directories         (SYSTEM ${FMT_INCLUDE_DIR})
+
 # LowFive
 if                          (NOT DEFINED LOWFIVE_PATH AND DEFINED ENV{LOWFIVE_PATH})
     set                     (LOWFIVE_PATH $ENV{LOWFIVE_PATH})

@@ -22,7 +22,6 @@ int main(int argc, char* argv[])
     float                     prod_frac         = 1.0 / 2.0;      // fraction of world ranks in producer
     std::string               producer_exec     = "./producer.so";    // name of producer executable
     std::string               consumer_exec     = "./consumer.so";    // name of consumer executable
-    int                       ntrials           = 1;              // number of trials to run
     bool                      verbose, help;
 
     // get command line arguments
@@ -39,7 +38,6 @@ int main(int argc, char* argv[])
         >> Option('c', "con_exec",  consumer_exec,  "name of consumer executable")
         >> Option('v', "verbose",   verbose,        "print the block contents")
         >> Option('h', "help",      help,           "show help")
-        >> Option(     "ntrials",   ntrials,        "number of trials to run")
         ;
 
     if (!ops.parse(argc,argv) || help)
@@ -173,51 +171,21 @@ int main(int argc, char* argv[])
                         passthru);
     };
 
-    std::vector<double> times(ntrials);     // elapsed time for each trial
-    double sum_time = 0.0;                  // sum of all times
-    for (auto i = 0; i < ntrials; i++)
+    // execute the tasks
+    if (!shared)
     {
-        // timing
-        world.barrier();
-        double t0 = MPI_Wtime();
-
-        if (!shared)
-        {
-            if (producer)
-                producer_f();
-            else
-                consumer_f();
-        } else
-        {
-            // not multithreading, just serializing
+        if (producer)
             producer_f();
+        else
             consumer_f();
-        }
-
-        // timing
-        world.barrier();
-        times[i] = MPI_Wtime() - t0;
-        sum_time += times[i];
-        if (world.rank() == 0)
-            fmt::print(stderr, "Elapsed time for trial {}\t\t{:.4f} s.\n", i, times[i]);
+    } else
+    {
+        // not multithreading, just serializing
+        producer_f();
+        consumer_f();
     }
 
+    // clean up
     if (shared)
         H5Pclose(plist);
-
-    // timing stats
-    double mean_time    = sum_time / ntrials;
-    double var_time     = 0.0;
-    for (auto i = 0; i < ntrials; i++)
-        var_time += ((times[i] - mean_time) * (times[i] - mean_time));
-    var_time /= ntrials;
-
-    if (world.rank() == 0)
-    {
-        fmt::print(stderr, "\nMean elapsed time for {} trials\t\t{:.4f} s.\n", ntrials, mean_time);
-        fmt::print(stderr, "Variance\t\t\t\t{:.4f}\n", var_time);
-        fmt::print(stderr, "Standard deviation\t\t\t{:.4f}\n", sqrt(var_time));
-        fmt::print(stderr, "Minimum\t\t\t\t\t{:.4f} s.\n", *(std::min_element(times.begin(), times.end())));
-        fmt::print(stderr, "Maximum\t\t\t\t\t{:.4f} s.\n", *(std::max_element(times.begin(), times.end())));
-    }
 }

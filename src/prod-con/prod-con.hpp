@@ -15,5 +15,3 @@ using diy_comm      = diy::mpi::communicator;
 
 namespace l5        = LowFive;
 
-enum {producer_task, producer1_task, producer2_task, consumer_task, consumer1_task, consumer2_task};
-
