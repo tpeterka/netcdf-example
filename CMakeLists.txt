@@ -62,6 +62,7 @@ set                         (libraries ${libraries} ${FMT_LIBRARY})
 include_directories         (SYSTEM ${FMT_INCLUDE_DIR})
 
 # LowFive
+# only needed for prod-con example, not henson or wilkins
 if                          (NOT DEFINED LOWFIVE_PATH AND DEFINED ENV{LOWFIVE_PATH})
     set                     (LOWFIVE_PATH $ENV{LOWFIVE_PATH})
 endif                       ()
@@ -79,8 +80,24 @@ endif                       ()
     message                 ("LOWFIVE_DIST_LIBRARY = ${LOWFIVE_DIST_LIBRARY}")
     message                 ("LOWFIVE_INCLUDE_DIR = ${LOWFIVE_INCLUDE_DIR}")
 set                         (libraries ${libraries} ${LOWFIVE_LIBRARY} ${LOWFIVE_DIST_LIBRARY})
-include_directories         (SYSTEM ${LOWFIVE_INCLUDE_DIR}
-                            SYSTEM ${LOWFIVE_INCLUDE_DIR}/diy)
+include_directories         (SYSTEM ${LOWFIVE_INCLUDE_DIR})
+
+# Henson
+if                          (NOT DEFINED HENSON_PATH AND DEFINED ENV{HENSON_PATH})
+    set                     (HENSON_PATH $ENV{HENSON_PATH})
+endif                       ()
+
+if                          (HENSON_PATH)
+    set                     (HENSON_LIBRARY ${HENSON_PATH}/lib/libhenson.a)
+    set                     (HENSON_PMPI_LIBRARY ${HENSON_PATH}/lib/libhenson-pmpi.so)
+else                        ()
+    message                 ("Looking for Henson")
+    find_package            (henson REQUIRED)
+endif                       ()
+message                     ("HENSON_LIBRARY = ${HENSON_LIBRARY}")
+message                     ("HENSON_PMPI_LIBRARY = ${HENSON_PMPI_LIBRARY}")
+set                         (libraries ${libraries} ${HENSON_PMPI_LIBRARY} ${HENSON_LIBRARY})
+
 
 # HDF5
 if                          (NOT DEFINED HDF5_PATH AND DEFINED ENV{HDF5_PATH})

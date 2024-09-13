@@ -1,4 +1,6 @@
 #include <diy/mpi/communicator.hpp>
+#include <diy/master.hpp>
+
 #include "prod-con.hpp"
 
 #include <netcdf.h>
@@ -15,22 +17,14 @@ herr_t fail_on_hdf5_error(hid_t stack_id, void*)
     exit(1);
 }
 
-extern "C" {
-void producer_f (
-        communicator& local,
-        const std::vector<communicator>& intercomms,
-        bool shared,
-        int metadata,
-        int passthru);
-}
-
-void producer_f (
-        communicator& local,
-        const std::vector<communicator>& intercomms,
-        bool shared,
-        int metadata,
-        int passthru)
+int main(int argc, char** argv)
 {
+    diy::mpi::environment   env(argc, argv, MPI_THREAD_MULTIPLE);
+
+    // for some reason, local has to be a duplicate of world, not world itself
+    diy::mpi::communicator      world;
+    communicator                local;
+    MPI_Comm_dup(world, &local);
     diy::mpi::communicator local_(local);
 
     // enable netCDF logging
@@ -48,30 +42,6 @@ void producer_f (
 
     // debug
     fmt::print(stderr, "producer: local comm rank {} size {}\n", local_.rank(), local_.size());
-
-    // VOL plugin and properties
-    hid_t plist;
-
-    if (shared)                 // single process, MetadataVOL test
-        fmt::print(stderr, "producer: using shared mode MetadataVOL plugin created by prod-con\n");
-    else                        // normal multiprocess, DistMetadataVOL plugin
-    {
-        l5::DistMetadataVOL& vol_plugin = l5::DistMetadataVOL::create_DistMetadataVOL(local, intercomms);
-        plist = H5Pcreate(H5P_FILE_ACCESS);
-
-        if (passthru)
-            H5Pset_fapl_mpio(plist, local, MPI_INFO_NULL);
-
-        l5::H5VOLProperty vol_prop(vol_plugin);
-        if (!getenv("HDF5_VOL_CONNECTOR"))
-            vol_prop.apply(plist);
-
-        // set lowfive properties
-        if (passthru)
-            vol_plugin.set_passthru("output.nc", "*");
-        if (metadata)
-            vol_plugin.set_memory("output.nc", "*");
-    }
 
     // set HDF5 error handler
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
@@ -120,14 +90,4 @@ void producer_f (
 
     // debug
     fmt::print(stderr, "*** producer after closing file ***\n");
-
-    if (!shared)
-        H5Pclose(plist);
-
-    // signal the consumer that data are ready
-    if (passthru && !metadata && !shared)
-    {
-        for (auto& intercomm: intercomms)
-            diy_comm(intercomm).barrier();
-    }
 }
