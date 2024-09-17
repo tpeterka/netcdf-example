@@ -1,0 +1,21 @@
+tasks:
+  - func: "./producer-wilkins.so"
+    nprocs: 1
+    args:
+    actions:
+    inports:
+    outports:
+      - filename: "output.nc"
+        dsets:
+          - name: "*"
+            passthru: 1
+            metadata: 0
+  - func: "./consumer-wilkins.so"
+    nprocs: 1
+    actions:
+    inports:
+      - filename: "output.nc"
+        dsets:
+          - name: "*"
+            passthru: 1
+            metadata: 0

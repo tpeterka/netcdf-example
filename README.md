@@ -19,7 +19,7 @@ source ./load-env.sh
 ### Subsequent times: load the Spack environment
 
 ```
-source /path/to/moab-diy/load-env.sh
+source /path/to/netcdf-example/load-env.sh
 ```
 
 ----
@@ -38,14 +38,13 @@ make -j install
 
 ## Running netcdf-example
 
-There are three options for running the example: prod-con (with no workflow system), henson (using the henson system), and wilkins (using the wilkins system). Currently prod-con and henson are
-implemented.
-
 First time: create an output.nc file
 
 Because of a quirk in NetCDF, there needs to be an output file `output.nc` on disk, otherwise the program will complain. For the prod-con example, run file mode first. For the henson and wilkins
 examples, edit the script to set pasthru to True for the first run. Alternatively, there is a blank.nc file included in the top level of this repository. You can copy it to the install directory of
 and rename it to `output.nc`.
+
+There are three options for running the example: prod-con (with no workflow system), henson (using the henson system), and wilkins (using the wilkins system).
 
 prod-con
 

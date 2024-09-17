@@ -24,7 +24,7 @@ if pm.group() == "producer":
     else:
         vol.set_memory("*", "*")
     # set the following path to point to your installation of producer
-    prod = h.Puppet("./producer-main.so", [], pm, nm)
+    prod = h.Puppet("./producer-henson.so", [], pm, nm)
 
     prod.proceed()
 
@@ -41,7 +41,7 @@ else:
     vol.set_intercomm("*", "*", 0)
 
     # set the following path to point to your installation of consumer
-    cons = h.Puppet("./consumer-main.so", [], pm, nm)
+    cons = h.Puppet("./consumer-henson.so", [], pm, nm)
 
     if passthru:
         h.to_mpi4py(pm.intercomm("producer", tag)).barrier()
