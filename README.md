@@ -46,7 +46,7 @@ and rename it to `output.nc`.
 
 There are three options for running the example: prod-con (with no workflow system), henson (using the henson system), and wilkins (using the wilkins system).
 
-prod-con
+### prod-con
 
 ```
 cd /path/to/netcdf-example/install/bin/prod-con
@@ -54,7 +54,7 @@ mpiexec -n <procs> ./prod-con -m 0 -f 1     # file mode
 mpiexec -n <procs> ./prod-con -m 1 -f 0     # memory mode
 ```
 
-henson
+### henson
 
 ```
 cd /path/to/netcdf-example/install/bin/henson
@@ -64,5 +64,16 @@ mpiexec -n <procs> python3 ./netcdf-henson.py
 Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/henson/netcdf-henson.py`. Alternatively, you may change the version of the same file in the source directory
 `/path/to/netcdf-example/src/henson/netcdf-henson.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
 is executed.
+
+### wilkins
+
+```
+cd /path/to/netcdf-example/install/bin/wilkins
+./wilkins-run.sh
+```
+
+Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/wilkins/wilkins-config.yaml`. The total number of MPI processes must also agree in
+`path/to/netcdf-example/install/bin/wilkins/wilkins-run.sh`. Alternatively, you may make changes in the source directory `/path/to/netcdf-example/src/wilkins` and rebuild. The build process copies the
+wilkins configuration and run scripts to the install directory. The version in the install directory is the one that is executed.
 
 -----
