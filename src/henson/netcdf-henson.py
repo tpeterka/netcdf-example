@@ -23,6 +23,8 @@ if pm.group() == "producer":
         vol.set_passthru("*", "*")
     else:
         vol.set_memory("*", "*")
+#     vol.set_intercomm("*", "*", 0)
+
     # set the following path to point to your installation of producer
     prod = h.Puppet("./producer-henson.so", [], pm, nm)
 

@@ -24,6 +24,19 @@ spack add netcdf-fortran@4.5.3
 spack add diy
 spack add fmt
 
+# the following is for optional ftk consumer w/ CUDA for GPU; comment out if not needed
+# spack add cuda
+# spack add vtk@9.2.2
+# spack add ndarray+hdf5+netcdf+mpi+cuda+vtk
+# # spack develop ftk@mpas+cuda ^ndarray+hdf5+netcdf+mpi+cuda+vtk
+# spack add ftk@mpas+cuda ^ndarray+hdf5+netcdf+mpi+cuda+vtk
+
+# the following is for optional ftk consumer w/o CUDA for CPU; comment out if not needed
+# spack add vtk@9.2.2
+# spack add ndarray+hdf5+netcdf+mpi+vtk
+# spack develop ftk@mpas+cuda ^ndarray+hdf5+netcdf+mpi+vtk
+# spack add ftk@mpas+cuda ^ndarray+hdf5+netcdf+mpi+vtk
+
 # install everything in environment
 echo "installing dependencies in environment"
 spack install

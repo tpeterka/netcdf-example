@@ -5,6 +5,44 @@ Workflow example using NetCDF-4
 
 Installation is done through Spack. If you don't have Spack installed or if Spack is new to you, go [here](https://spack.readthedocs.io/en/latest/) first.
 
+-----
+
+## Adding the following Spack repositories to your local Spack installation
+
+LowFive
+```
+git clone https://github.com/diatomic/LowFive
+spack repo add LowFive
+```
+
+Wilkins
+```
+git clone https://github.com/orcunyildiz/wilkins
+spack repo add wilkins
+```
+
+Optional: FTK
+```
+git clone https://github.com/hguo/spack-mpas-o
+spack repo add spack-mpas-o
+```
+
+Optional: FTK
+Change ftk Spack recipe to pull from a fork
+```
+spack edit ftk
+```
+
+Edit lines 14-16 as follows
+```
+homepage = "https://github.com/tpeterka/ftk"
+url = "https://github.com/tpeterka/ftk/archive/0.0.7.1.tar.gz"
+git = "https://github.com/tpeterka/ftk.git"
+```
+And save the file.
+
+-----
+
 ## Setting up Spack environment
 
 ### First time: create and load the Spack environment
