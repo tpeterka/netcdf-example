@@ -76,6 +76,10 @@ make -j install
 
 ## Running netcdf-example
 
+```
+source /path/to/netcdf-example/load-env.sh
+```
+
 First time: create an output.nc file
 
 Because of a quirk in NetCDF, there needs to be an output file `output.nc` on disk, otherwise the program will complain. For the prod-con example, run file mode first. For the henson and wilkins
@@ -104,6 +108,11 @@ Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/inst
 is executed.
 
 ### henson-ftk
+
+Export spack install location of FTK:
+```
+export FTK=`spack location -i ftk`
+```
 
 Running standalone ftk as a test
 ```
