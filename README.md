@@ -91,6 +91,7 @@ There are four options for running the example: prod-con (with no workflow syste
 ### prod-con
 
 ```
+source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/prod-con
 mpiexec -n <procs> ./prod-con -m 0 -f 1     # file mode
 mpiexec -n <procs> ./prod-con -m 1 -f 0     # memory mode
@@ -99,6 +100,7 @@ mpiexec -n <procs> ./prod-con -m 1 -f 0     # memory mode
 ### henson
 
 ```
+source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/henson
 mpiexec -n <procs> python3 ./netcdf-henson.py
 ```
@@ -116,12 +118,16 @@ export FTK=`spack location -i ftk`
 
 Running standalone ftk as a test
 ```
+source /path/to/netcdf-example/load-env.sh
+unset HDF5_VOL_CONNECTOR
+unset HDF5_PLUGIN_PATH
 cd /path/to/netcdf-example/install/bin/henson-ftk
 ./run-ftk.sh
 ```
 
 Running in a workflow
 ```
+source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/henson-ftk
 mpiexec -n <procs> python3 ./henson-ftk.py
 ```
@@ -133,6 +139,7 @@ is executed.
 ### wilkins
 
 ```
+source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/wilkins
 ./wilkins-run.sh
 ```
