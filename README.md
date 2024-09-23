@@ -82,7 +82,7 @@ Because of a quirk in NetCDF, there needs to be an output file `output.nc` on di
 examples, edit the script to set pasthru to True for the first run. Alternatively, there is a blank.nc file included in the top level of this repository. You can copy it to the install directory of
 and rename it to `output.nc`.
 
-There are three options for running the example: prod-con (with no workflow system), henson (using the henson system), and wilkins (using the wilkins system).
+There are four options for running the example: prod-con (with no workflow system, netcdf producer and consumer), henson (using the henson system with netcdf consumer), henson-ftk (using the henson system with ftk consumer), and wilkins (using the wilkins system with netcdf consumer).
 
 ### prod-con
 
@@ -101,6 +101,24 @@ mpiexec -n <procs> python3 ./netcdf-henson.py
 
 Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/henson/netcdf-henson.py`. Alternatively, you may change the version of the same file in the source directory
 `/path/to/netcdf-example/src/henson/netcdf-henson.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
+is executed.
+
+### henson-ftk
+
+Running standalone ftk as a test
+```
+cd /path/to/netcdf-example/install/bin/henson-ftk
+./run-ftk.sh
+```
+
+Running in a workflow
+```
+cd /path/to/netcdf-example/install/bin/henson-ftk
+mpiexec -n <procs> python3 ./henson-ftk.py
+```
+
+Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/henson-ftk/henson-ftk.py`. Alternatively, you may change the version of the same file in the source directory
+`/path/to/netcdf-example/src/henson-ftk/henson-ftk.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
 is executed.
 
 ### wilkins

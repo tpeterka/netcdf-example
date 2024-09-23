@@ -1,0 +1,8 @@
+stream:
+  name: producer
+  path_prefix: "."
+  format: netcdf
+  filenames: "output.nc"
+  vars:
+    - name: v1
+
