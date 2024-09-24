@@ -47,7 +47,9 @@ int main(int argc, char** argv)
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
     // create file
-    err = nc_create_par("output.nc", NC_NETCDF4 | NC_CLOBBER, local, MPI_INFO_NULL,  &ncid); ERR
+    err = nc_create_par("output.nc",
+            NC_NETCDF4 | NC_CLOBBER | NC_NODIMSCALE_ATTACH,
+            local, MPI_INFO_NULL,  &ncid); ERR
 
     // variable sizes
     int ntime_steps = 3;
