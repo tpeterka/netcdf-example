@@ -6,6 +6,7 @@
 #include <netcdf_par.h>
 
 #include "fmt/format.h"
+#include "fmt/ranges.h"
 
 #define MAX_DIMS 10
 
