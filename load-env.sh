@@ -16,6 +16,7 @@ export WILKINS_PATH=`spack location -i wilkins`
 
 echo "setting flags for running netcdf-example"
 export LD_LIBRARY_PATH=$NETCDF_PATH/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$NETCDF_PATH/lib64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$LOWFIVE_PATH/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$HENSON_PATH/lib:$LD_LIBRARY_PATH
 
