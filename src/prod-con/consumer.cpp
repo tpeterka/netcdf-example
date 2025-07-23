@@ -112,8 +112,7 @@ void consumer_f (
     int                     natts;                  // number of variable attributes
     nc_type                 dtype;                  // netCDF data type of this variable
     err = nc_inq_var(ncid, 0, varname, &dtype, &ndims, &dimids[0], &natts); ERR
-    fmt::print(stderr, "*** consumer varname {} dtype {} ndims {} dimids [{}] natts {}\n",
-            varname, dtype, ndims, fmt::join(dimids, ","), natts);
+    fmt::print(stderr, "*** consumer varname {} dtype {} ndims {} natts {}\n", varname, dtype, ndims, natts);
 
     // read variables
 

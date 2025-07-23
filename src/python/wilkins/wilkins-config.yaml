@@ -1,0 +1,17 @@
+tasks:
+  - func: "./producer.py"
+    nprocs: 1
+    outports:
+      - filename: "output.nc"
+        dsets:
+          - name: "*"
+            passthru: 1
+            metadata: 0
+  - func: "./consumer.py"
+    nprocs: 1
+    inports:
+      - filename: "output.nc"
+        dsets:
+          - name: "*"
+            passthru: 1
+            metadata: 0
