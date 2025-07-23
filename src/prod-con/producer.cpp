@@ -41,7 +41,6 @@ void producer_f (
     int                     elements_per_pe;
     int                     ndims;
     int                     varid1          = -1;
-    int                     varid2          = -1;
     std::vector<size_t>     dim_len(MAX_DIMS);
     std::vector<int>        dimid_v1(MAX_DIMS);
     int                     err;
@@ -77,19 +76,18 @@ void producer_f (
     H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
     // create file
-    err = nc_create_par("output.nc", NC_NETCDF4 | NC_CLOBBER, local, MPI_INFO_NULL,  &ncid); ERR
+    err = nc_create_par("output.nc",
+            NC_NETCDF4 | NC_CLOBBER | NC_NODIMSCALE_ATTACH,
+            local, MPI_INFO_NULL,  &ncid); ERR
 
     // variable sizes
-    int ntime_steps = 3;
     dim_len[0]  = 128;
-    dim_len[1]  = 256;
 
     // define variables
 
     // ----- variable v1 -----
     err = nc_def_dim(ncid, "s", dim_len[0], &dimid_v1[0]); ERR
     err = nc_def_var(ncid, "v1", NC_INT, 1, &dimid_v1[0], &varid1); ERR
-//     fmt::print(stderr, "producer varid1 = {} dimid_v1 = [{}]\n", varid1, dimid_v1[0]);
 
     // end define mode
     err = nc_enddef(ncid); ERR
