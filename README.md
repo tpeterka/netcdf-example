@@ -148,4 +148,28 @@ Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/inst
 `path/to/netcdf-example/install/bin/wilkins/wilkins-run.sh`. Alternatively, you may make changes in the source directory `/path/to/netcdf-example/src/wilkins` and rebuild. The build process copies the
 wilkins configuration and run scripts to the install directory. The version in the install directory is the one that is executed.
 
+### python/henson
+
+```
+source /path/to/netcdf-example/load-env.sh
+cd /path/to/netcdf-example/install/bin/python/henson
+mpiexec -n 2 -l python3 -u ./py-netcdf-henson.py
+```
+
+Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/python/henson/py-netcdf-henson.py`. Alternatively, you may change the version of the same file in the source directory
+`/path/to/netcdf-example/src/python/henson/py-netcdf-henson.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
+is executed.
+
+### python/wilkins
+
+```
+source /path/to/netcdf-example/load-env.sh
+cd /path/to/netcdf-example/install/bin/python/wilkins
+./wilkins-run.sh
+```
+
+Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/python/wilkins/wilkins-config.yaml`. The total number of MPI processes must also agree in
+`path/to/netcdf-example/install/bin/python/wilkins/wilkins-run.sh`. Alternatively, you may make changes in the source directory `/path/to/netcdf-example/src/wilkins` and rebuild. The build process copies the
+wilkins configuration and run scripts to the install directory. The version in the install directory is the one that is executed.
+
 -----

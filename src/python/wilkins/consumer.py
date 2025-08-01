@@ -1,7 +1,15 @@
 from netCDF4 import Dataset
+import time
+import sys
 
-rootgrp = Dataset("output.nc", "r", format="NETCDF4")
+time.sleep(1)
 
-print("consumer:", rootgrp.data_model)
+print("consumer before file open")
+
+rootgrp = Dataset("output.nc")
+
+print(rootgrp.variables["v1"][:])
 
 rootgrp.close()
+print("consumer completed successfully")
+sys.exit("consumer exiting")

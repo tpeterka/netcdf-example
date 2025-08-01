@@ -21,7 +21,7 @@ spack add henson+python+mpi-wrappers
 spack add netcdf-c@4.9+mpi build_system=cmake
 spack add parallel-netcdf
 spack add netcdf-fortran@4.5.3
-spack add py-netcdf4
+spack add py-netcdf4+mpi
 spack add diy@master
 spack add fmt
 
