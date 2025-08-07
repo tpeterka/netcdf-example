@@ -1,7 +1,7 @@
 tasks:
   - func: "./producer.py"
     nprocs: 1
-    actions: ["actions", "prod_callback"]
+      # actions: ["actions", "prod_callback"]
     outports:
       - filename: "output.nc"
         dsets:
@@ -10,7 +10,7 @@ tasks:
             metadata: 0
   - func: "./consumer.py"
     nprocs: 1
-    actions: ["actions", "con_callback"]
+      # actions: ["actions", "con_callback"]
     inports:
       - filename: "output.nc"
         dsets:

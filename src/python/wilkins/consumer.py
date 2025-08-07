@@ -6,10 +6,10 @@ time.sleep(1)
 
 print("consumer before file open")
 
-rootgrp = Dataset("output.nc")
+rootgrp = Dataset("output.nc", "a", format="NETCDF4")
 
 print(rootgrp.variables["v1"][:])
 
 rootgrp.close()
 print("consumer completed successfully")
-sys.exit("consumer exiting")
+# sys.exit("consumer exiting")

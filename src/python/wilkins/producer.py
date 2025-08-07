@@ -1,5 +1,5 @@
-from netCDF4 import Dataset
 import numpy as np
+from netCDF4 import Dataset
 import sys
 
 print("producer before file create")
@@ -16,7 +16,8 @@ v = np.arange(0,128)
 v1[:] = v
 
 # clean up and shut down
+rootgrp.sync()
 rootgrp.close()
 print("producer completed successfully")
-sys.exit("producer exiting")    # needed to force file close
+# sys.exit("producer exiting")    # needed to force file close
 

@@ -1,2 +1,2 @@
-mpirun -n 2 -l python3 -u ./wilkins-master.py ./wilkins-config.yaml -v 2
+mpirun -n 2 -l python3 -u ./wilkins-master.py ./wilkins-config.yaml -v 2 -p 1
 
