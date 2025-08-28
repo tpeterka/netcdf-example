@@ -1,25 +1,20 @@
-from netCDF4 import Dataset
 import numpy as np
+from netCDF4 import Dataset
 import sys
 
-def prod():
-    print("producer before file create")
+print("producer before file create")
 
-    # root group
-    rootgrp = Dataset("output.nc", "w", format="NETCDF4")
+# root group
+rootgrp = Dataset("output.nc", "w", format="NETCDF4")
 
-    # dimension
-    s = rootgrp.createDimension("s", 128)
+# dimension
+s = rootgrp.createDimension("s", 128)
 
-    # variable
-    v1 = rootgrp.createVariable("v1","i4",("s",))
-    v = np.arange(0,128)
-    v1[:] = v
+# variable
+v1 = rootgrp.createVariable("v1","i4",("s",))
+v = np.arange(0,128)
+v1[:] = v
 
-    # clean up and shut down
-    rootgrp.close()
-    print("producer completed successfully")
-#     sys.exit("producer exiting")    # needed to force file close
-
-if __name__ == '__main__':
-    prod()
+# clean up and shut down
+rootgrp.close()
+print("producer completed successfully")

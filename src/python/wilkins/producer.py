@@ -16,8 +16,6 @@ v = np.arange(0,128)
 v1[:] = v
 
 # clean up and shut down
-rootgrp.sync()
 rootgrp.close()
 print("producer completed successfully")
-# sys.exit("producer exiting")    # needed to force file close
 
