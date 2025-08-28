@@ -21,3 +21,5 @@ def prod():
     print("producer completed successfully")
 #     sys.exit("producer exiting")    # needed to force file close
 
+if __name__ == '__main__':
+    prod()

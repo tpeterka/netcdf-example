@@ -6,7 +6,7 @@ time.sleep(1)
 
 print("consumer before file open")
 
-rootgrp = Dataset("output.nc", "a", format="NETCDF4")
+rootgrp = Dataset("output.nc", "r", format="NETCDF4")
 
 print(rootgrp.variables["v1"][:])
 
