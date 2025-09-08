@@ -1,6 +1,7 @@
 from mpi4py import MPI
 import numpy as np
 from netCDF4 import Dataset
+import time
 
 world = MPI.COMM_WORLD
 rank = world.Get_rank()
@@ -30,6 +31,9 @@ if rank < size / 2:
 
     # synchronize with consumer
     world.Barrier()
+
+    # confirm that even with a sleep, still works
+    time.sleep(5)
 
 # ----- consumer -----
 

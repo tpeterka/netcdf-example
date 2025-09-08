@@ -3,11 +3,9 @@
 from mpi4py import MPI
 import pyhenson as h
 import lowfive
-from pathlib import Path
 import os
-
 import importlib
-import runpy
+import time
 
 world = MPI.COMM_WORLD.Dup()
 size = world.Get_size()
@@ -32,6 +30,10 @@ if pm.group() == "producer":
 
     if passthru:
         h.to_mpi4py(pm.intercomm("consumer", tag)).barrier()
+
+    # confirm that with a sleep, the problem of closing the producer file too late exists as it does in wilkins
+    time.sleep(5)
+
 else:
     tag = 0
 #     lowfive.create_logger("debug")

@@ -1,6 +1,4 @@
 from netCDF4 import Dataset
-import time
-import sys
 
 print("consumer before file open")
 
