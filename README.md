@@ -86,9 +86,11 @@ Because of a quirk in NetCDF, there needs to be an output file `output.nc` on di
 examples, edit the script to set pasthru to True for the first run. Alternatively, there is a blank.nc file included in the top level of this repository. You can copy it to the install directory of
 and rename it to `output.nc`.
 
-There are four options for running the example: prod-con (with no workflow system, netcdf producer and consumer), henson (using the henson system with netcdf consumer), henson-ftk (using the henson system with ftk consumer), and wilkins (using the wilkins system with netcdf consumer).
+There are various options for running the example: prod-con (with no workflow system, netcdf producer and consumer), henson (using the henson system with netcdf consumer), henson-ftk (using the henson system with ftk consumer), and wilkins (using the wilkins system with netcdf consumer).
 
 ### prod-con
+
+C++ producer-consumer with no workflow system but with LowFive
 
 ```
 source /path/to/netcdf-example/load-env.sh
@@ -98,6 +100,8 @@ mpiexec -n <procs> ./prod-con -m 1 -f 0     # memory mode
 ```
 
 ### henson
+
+C++ producer and C++ consumer using Henson
 
 ```
 source /path/to/netcdf-example/load-env.sh
@@ -110,6 +114,8 @@ Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/inst
 is executed.
 
 ### henson-ftk
+
+C++ producer and C++ FTK consumer using Henson
 
 Export spack install location of FTK:
 ```
@@ -138,6 +144,8 @@ is executed.
 
 ### wilkins
 
+C++ producer and C++ consumer using Wilkins
+
 ```
 source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/wilkins
@@ -149,6 +157,8 @@ Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/inst
 wilkins configuration and run scripts to the install directory. The version in the install directory is the one that is executed.
 
 ### python/henson
+
+Python producer and Python consumer using Henson
 
 ```
 source /path/to/netcdf-example/load-env.sh
@@ -162,6 +172,8 @@ is executed.
 
 ### python/wilkins
 
+Python producer and Python consumer using Wilkins
+
 ```
 source /path/to/netcdf-example/load-env.sh
 cd /path/to/netcdf-example/install/bin/python/wilkins
@@ -171,5 +183,34 @@ cd /path/to/netcdf-example/install/bin/python/wilkins
 Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/python/wilkins/wilkins-config.yaml`. The total number of MPI processes must also agree in
 `path/to/netcdf-example/install/bin/python/wilkins/wilkins-run.sh`. Alternatively, you may make changes in the source directory `/path/to/netcdf-example/src/wilkins` and rebuild. The build process copies the
 wilkins configuration and run scripts to the install directory. The version in the install directory is the one that is executed.
+
+### python/prod-con
+
+Python producer-consumer in a single executable that does not use LowFive, Henson, or Wilkins. File mode only.
+
+```
+source /path/to/netcdf-example/load-env.sh
+cd /path/to/netcdf-example/install/bin/python/prod-con
+unset HDF_VOL_CONNECTOR
+mpiexec -n 2 -l python3 -u ./prod-con.py
+```
+
+Changes are made in `path/to/netcdf-example/install/bin/python/prod-con/prod-con.py`. Alternatively, you may change the version of the same file in the source directory
+`/path/to/netcdf-example/src/python/prod-con/prod-con.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
+is executed.
+
+### cpp-python/henson
+
+C++ producer and Python consumer using Henson
+
+```
+source /path/to/netcdf-example/load-env.sh
+cd /path/to/netcdf-example/install/bin/cpp-python/henson
+mpiexec -n 2 -l python3 -u ./cpp-py-netcdf-henson.py
+```
+
+Changes to file mode, memory mode, etc. are made in `path/to/netcdf-example/install/bin/cpp-python/henson/cpp-py-netcdf-henson.py`. Alternatively, you may change the version of the same file in the source directory
+`/path/to/netcdf-example/src/cpp-python/henson/cpp-py-netcdf-henson.py` and rebuild. The build copies the Python script from the src directory to the install directory. The copy in the install directory is the one that
+is executed.
 
 -----
