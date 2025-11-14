@@ -13,15 +13,18 @@ spack env create $SPACKENV $YAML
 echo "activating spack environment"
 spack env activate $SPACKENV
 
-spack add mpich@4
+spack add mpich
 spack add hdf5@1.14+hl+mpi
-spack add lowfive@debug
+spack add lowfive
 spack add wilkins
-spack add henson+python+mpi-wrappers
-spack add netcdf-c@4.9+mpi build_system=cmake
+spack develop henson+python+mpi-wrappers
+# spack add henson+python+mpi-wrappers
+spack add netcdf-c@4.9+mpi
 spack add parallel-netcdf
 spack add netcdf-fortran@4.5.3
-spack add py-netcdf4+mpi
+spack add py-pip
+# spack add py-netcdf4+mpi
+# spack add diy ^mpich
 spack add diy@master
 spack add fmt
 

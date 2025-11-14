@@ -1,5 +1,5 @@
 if                          (NOT APPLE)
-   set                      (linker_flags "-pie -Wl,--export-dynamic")
+   set                      (linker_flags "-Wl,--export-dynamic")
    set                      (linker_flags "${linker_flags} -Wl,-u,henson_set_contexts,-u,henson_set_namemap")
 else                        ()
    set                      (linker_flags "-Wl,-u,_henson_set_contexts,-u,_henson_set_namemap")
