@@ -1,4 +1,4 @@
-project                     (scorpio-example)
+project                     (netcdf-example LANGUAGES CXX Fortran)
 cmake_minimum_required      (VERSION 3.12)
 
 option                      (wrapped_mpi    "MPI compiler wrapper requires no further MPI libs"     OFF)
