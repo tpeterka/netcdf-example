@@ -1,5 +1,5 @@
-project                     (netcdf-example LANGUAGES CXX Fortran)
 cmake_minimum_required      (VERSION 3.12)
+project                     (netcdf-example LANGUAGES CXX Fortran)
 
 option                      (wrapped_mpi    "MPI compiler wrapper requires no further MPI libs"     OFF)
 
@@ -166,8 +166,7 @@ include_directories         (SYSTEM ${NETCDF_INCLUDE_DIR})
 
 # Include dirs
 set                         (CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem")
-include_directories         (${CMAKE_CURRENT_SOURCE_DIR}/include
-                            SYSTEM ${MPI_C_INCLUDE_PATH})
+include_directories         (SYSTEM ${MPI_C_INCLUDE_PATH})
 
 # Libraries
 set                         (libraries

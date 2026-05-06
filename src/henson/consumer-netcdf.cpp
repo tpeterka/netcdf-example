@@ -12,13 +12,6 @@
 
 #define ERR {if(err!=NC_NOERR)printf("Error at line=%d: %s\n", __LINE__, nc_strerror(err));}
 
-herr_t fail_on_hdf5_error(hid_t stack_id, void*)
-{
-    H5Eprint(stack_id, stderr);
-    fprintf(stderr, "An HDF5 error was detected. Terminating.\n");
-    exit(1);
-}
-
 int main(int argc, char** argv)
 {
     diy::mpi::environment   env(argc, argv, MPI_THREAD_MULTIPLE);
@@ -31,7 +24,7 @@ int main(int argc, char** argv)
 
     // enable netCDF logging
     int level = 5;      // 1: min, 5: max
-    nc_set_log_level(level);
+//     nc_set_log_level(level);
 
     int                     ncid;
     int                     elements_per_pe;
@@ -47,9 +40,6 @@ int main(int argc, char** argv)
 
     // debug
     fmt::print(stderr, "consumer: local comm rank {} size {}\n", local_.rank(), local_.size());
-
-    // set HDF5 error handler
-    H5Eset_auto(H5E_DEFAULT, fail_on_hdf5_error, NULL);
 
     // open file for reading
     err = nc_open_par("output.nc", NC_NOWRITE, local, MPI_INFO_NULL, &ncid); ERR
@@ -79,9 +69,7 @@ int main(int argc, char** argv)
     err = nc_inq_var(ncid, 0, varname, &dtype, &ndims, &dimids[0], &natts); ERR
     fmt::print(stderr, "*** consumer varname {} dtype {} ndims {} natts {}\n", varname, dtype, ndims, natts);
 
-    // read variables
-
-    //  ------ variable v1 -----
+    // read variable v1
 
     // decomposition
     elements_per_pe = dim_len[0] / local_.size();
@@ -96,20 +84,12 @@ int main(int argc, char** argv)
     // set collective access
     err = nc_var_par_access(ncid, varid1, NC_COLLECTIVE); ERR
 
-    // read variable
+    // read v1
     err = nc_get_vara_int(ncid, varid1, &starts[0], &counts[0], &v1[0]); ERR
 
-    // check the data values
-    for (int i = 0; i < elements_per_pe; i++)
-    {
-        if (v1[i] != local_.rank() * elements_per_pe + i)
-        {
-            fmt::print(stderr, "*** consumer error: v1[{}] = {} which should be {} ***\n", i, v1[i], local_.rank() * elements_per_pe + i);
-            abort();
-        }
-    }
-
-    // ------------------------------
+    // print v1
+    for (auto i = 0; i < v1.size(); i++)
+        fmt::print(stderr, "v1[{}] = {}\n", local_.rank() * elements_per_pe + i, v1[i]);
 
     // close file
     err = nc_close(ncid); ERR

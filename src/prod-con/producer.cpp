@@ -35,7 +35,7 @@ void producer_f (
 
     // enable netCDF logging
     int level = 5;      // 1: min, 5: max
-    nc_set_log_level(level);
+//     nc_set_log_level(level);
 
     int                     ncid;
     int                     elements_per_pe;
