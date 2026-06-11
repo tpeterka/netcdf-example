@@ -1,5 +1,7 @@
 #!/bin/bash
 
+unset PROFILE_PRELIB
+
 export SPACKENV=netcdf-example-env
 export YAML=$PWD/env.yaml
 

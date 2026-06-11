@@ -10,10 +10,9 @@ echo "setting flags for building netcdf-example"
 export NETCDF_PATH=`spack location -i netcdf-c`
 export LOWFIVE_PATH=`spack location -i lowfive`
 export HENSON_PATH=`spack location -i henson`
-# export DIY_PATH=`spack location -i diy`
-# export FMT_PATH=`spack location -i fmt`
+export DIY_PATH=`spack location -i diy`
+export FMT_PATH=`spack location -i fmt`
 export WILKINS_PATH=`spack location -i wilkins`
-export HENSON=`spack location -i henson`
 
 echo "setting flags for running netcdf-example"
 export LD_LIBRARY_PATH=$NETCDF_PATH/lib:$LD_LIBRARY_PATH

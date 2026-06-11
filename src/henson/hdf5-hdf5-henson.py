@@ -9,7 +9,7 @@ import os
 world = MPI.COMM_WORLD.Dup()
 size = world.Get_size()
 
-passthru = True
+passthru = False
 consumer_procs = int(size / 2)
 
 pm = h.ProcMap(world, [("producer", size - consumer_procs), ("consumer", consumer_procs)])
@@ -26,7 +26,7 @@ if pm.group() == "producer":
 #     vol.set_intercomm("*", "*", 0)
 
     # set the following path to point to your installation of producer
-    prod = h.Puppet("./producer-hdf5-henson.so", [], pm, nm)
+    prod = h.Puppet("/global/homes/t/tpeterka/software/netcdf-example/build/src/henson/producer-hdf5-henson.so", [], pm, nm)
 
     prod.proceed()
 
@@ -43,7 +43,7 @@ else:
     vol.set_intercomm("*", "*", 0)
 
     # set the following path to point to your installation of consumer
-    cons = h.Puppet("./consumer-hdf5-henson.so", [], pm, nm)
+    cons = h.Puppet("/global/homes/t/tpeterka/software/netcdf-example/build/src/henson/consumer-hdf5-henson.so", [], pm, nm)
 
     if passthru:
         h.to_mpi4py(pm.intercomm("producer", tag)).barrier()
